@@ -53,23 +53,23 @@ keystone.Email.prototype.send = function (options, callback) {
 		if (err) {
 			return callback(err, null);
 		}
+		var message = toSend.message;
 
+		var attachments = [];
+
+		if (message.attachments) {
+			attachments = message.attachments.map(function (attachment) {
+				return {
+					cid: attachment.cid,
+					filename: attachment.name,
+					content: attachment.content,
+					contentType: attachment.type,
+					encoding: 'base64'
+				};
+			});
+		}
 		return process.nextTick(function() {
-			var message = toSend.message;
 
-			var attachments = [];
-
-			if (message.attachments) {
-				attachments = message.attachments.map(function (attachment) {
-					return {
-						cid: attachment.cid,
-						filename: attachment.name,
-						content: attachment.content,
-						contentType: attachment.type,
-						encoding: 'base64'
-					};
-				});
-			}
 
 			var mail = {
 				from: buildAddress(message.from_email, message.from_name),
@@ -83,7 +83,7 @@ keystone.Email.prototype.send = function (options, callback) {
 
 			if (options.sendPlainText) {
 				if (typeof options.sendPlainText === 'object') {
-					mail.text = htmlToText.fromString(message.html, options.sendPlainText);	
+					mail.text = htmlToText.fromString(message.html, options.sendPlainText);
 				} else {
 					mail.text = htmlToText.fromString(message.html);
 				}
